@@ -1,13 +1,14 @@
 # Base image
-FROM golang:1.18-alpine as builder
+# Using `make` to build the executable, so now we don't need the multi-part build
+# FROM golang:1.18-alpine as builder
 
-RUN mkdir /app
+# RUN mkdir /app
 
-COPY . /app
+# COPY . /app
 
-WORKDIR /app
+# WORKDIR /app
 
-RUN CGO_ENABLED=0 go build -o brokerApp ./cmd/api
+# RUN CGO_ENABLED=0 go build -o brokerApp ./cmd/api
 
 # RUN chmod +x /app/brokerApp
 
@@ -16,6 +17,7 @@ FROM alpine:latest
 
 RUN mkdir /app
 
-COPY --from=builder /app/brokerApp /app
+# COPY --from=builder /app/brokerApp /app
+COPY brokerApp /app
 
 CMD [ "/app/brokerApp" ]
