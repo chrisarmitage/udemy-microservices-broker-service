@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 )
 
@@ -52,6 +53,8 @@ func (app *Config) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
+	log.Printf("::authenticate - called with E:'%s' P:'%s'", a.Email, a.Password)
+
 	jsonData, _ := json.MarshalIndent(a, "", "\t")
 
 	request, err := http.NewRequest("POST", "http://authentication-service/authenticate", bytes.NewBuffer(jsonData))
@@ -68,6 +71,8 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 	}
 
 	defer response.Body.Close()
+
+	log.Printf("::authenticate - response from auth server, Code %d", response.StatusCode)
 
 	if response.StatusCode == http.StatusUnauthorized {
 		app.errorJson(w, errors.New("invalid credentials"))
@@ -98,6 +103,8 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 }
 
 func (app *Config) logItem(w http.ResponseWriter, entry LogPayload) {
+	log.Printf("::logItem - called with N:'%s' D:'%s'", entry.Name, entry.Data)
+
 	jsonData, _ := json.MarshalIndent(entry, "", "\t")
 
 	logServiceUrl := "http://logger-service/log"
@@ -118,6 +125,8 @@ func (app *Config) logItem(w http.ResponseWriter, entry LogPayload) {
 	}
 
 	defer response.Body.Close()
+
+	log.Printf("::logItem - response from logger server, Code %d", response.StatusCode)
 
 	if response.StatusCode != http.StatusAccepted {
 		app.errorJson(w, errors.New("error calling logger service"))
