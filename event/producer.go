@@ -1,6 +1,8 @@
 package event
 
 import (
+	"log"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -47,7 +49,7 @@ func (e *Emmitter) push(event string, severity string) error {
 		false,
 		amqp.Publishing{
 			ContentType: "text/plain",
-			Body: []byte(event)
+			Body: []byte(event),
 		},
 	)
 	
