@@ -33,7 +33,7 @@ func (e *Emmitter) setup() error {
 	return declareExchange(channel)
 }
 
-func (e *Emmitter) push(event string, severity string) error {
+func (e *Emmitter) Push(event string, severity string) error {
 	channel, err := e.connection.Channel()
 	if err != nil {
 		return err
