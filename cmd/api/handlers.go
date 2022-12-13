@@ -2,12 +2,18 @@ package main
 
 import (
 	"broker/event"
+	"broker/logs"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
 	"net/rpc"
+	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type RequestPayload struct {
@@ -192,8 +198,9 @@ func (app *Config) sendMail(w http.ResponseWriter, msg MailPayload) {
 	app.writeJson(w, http.StatusAccepted, payloadResponse)
 }
 
-
 func (app *Config) logItemViaQueue(w http.ResponseWriter, entry LogPayload) {
+	log.Printf("::logItemViaQueue - called with N:'%s' D:'%s'", entry.Name, entry.Data)
+
 	err := app.pushToQueue(entry.Name, entry.Data)
 	if err != nil {
 		app.errorJson(w, err)
@@ -234,6 +241,7 @@ type RpcPayload struct {
 }
 
 func (app *Config) logItemViaRpc(w http.ResponseWriter, entry LogPayload) {
+	log.Printf("::logItemViaRpc - called with N:'%s' D:'%s'", entry.Name, entry.Data)
 	client, err := rpc.Dial("tcp", "logger-service:5001")
 	if err != nil {
 		app.errorJson(w, err)
@@ -255,6 +263,49 @@ func (app *Config) logItemViaRpc(w http.ResponseWriter, entry LogPayload) {
 	var payloadResponse jsonResponse
 	payloadResponse.Error = false
 	payloadResponse.Message = "logged via rpc"
+
+	app.writeJson(w, http.StatusAccepted, payloadResponse)
+}
+
+func (app *Config) logItemViaGrpc(w http.ResponseWriter, r *http.Request) {
+	log.Printf("::logItemViaGrpc")
+	var requestPayload RequestPayload
+
+	err := app.readJson(w, r, &requestPayload)
+	if err != nil {
+		app.errorJson(w, err)
+		return
+	}
+
+	
+	log.Printf("::logItemViaGrpc - called with N:'%s' D:'%s'", requestPayload.Log.Name, requestPayload.Log.Data)
+
+	conn, err := grpc.Dial("logger-service:50001", grpc.WithTransportCredentials(insecure.NewCredentials().Clone()), grpc.WithBlock())
+	if err != nil {
+		app.errorJson(w, err)
+		return
+	}
+
+	defer conn.Close()
+
+	client := logs.NewLogServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	_, err = client.WriteLog(ctx, &logs.LogRequest{
+		LogEntry: &logs.Log{
+			Name: requestPayload.Log.Name,
+			Data: requestPayload.Log.Data,
+		},
+	})
+	if err != nil {
+		app.errorJson(w, err)
+		return
+	}
+
+	var payloadResponse jsonResponse
+	payloadResponse.Error = false
+	payloadResponse.Message = "logged via grpc!"
 
 	app.writeJson(w, http.StatusAccepted, payloadResponse)
 }
