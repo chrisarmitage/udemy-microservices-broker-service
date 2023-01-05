@@ -37,6 +37,12 @@ jobs:
         #  version: '<version>' # default is latest stable
         id: install
 
+      - name: Kubernetes set context
+        uses: azure/k8s-set-context@v2
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
       - name: Deploy to k8s
         run: |
           kubectl config view
