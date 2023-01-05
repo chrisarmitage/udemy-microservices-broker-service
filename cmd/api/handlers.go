@@ -43,7 +43,7 @@ type MailPayload struct {
 func (app *Config) Broker(w http.ResponseWriter, r *http.Request) {
 	payload := jsonResponse{
 		Error:   false,
-		Message: "Hit the broker v2",
+		Message: "Hit the broker v3",
 	}
 
 	_ = app.writeJson(w, http.StatusOK, payload)
@@ -277,7 +277,6 @@ func (app *Config) logItemViaGrpc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
 	log.Printf("::logItemViaGrpc - called with N:'%s' D:'%s'", requestPayload.Log.Name, requestPayload.Log.Data)
 
 	conn, err := grpc.Dial("logger-service:50001", grpc.WithTransportCredentials(insecure.NewCredentials().Clone()), grpc.WithBlock())
