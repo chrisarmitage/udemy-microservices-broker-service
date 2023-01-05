@@ -30,3 +30,18 @@ jobs:
           push: true
           tags: chrisarmitage/broker-service:latest
           file: "broker-service.dockerfile"
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        #with:
+        #  version: '<version>' # default is latest stable
+        id: install
+
+      - name: get linode kubernetes config
+        uses: mavieth/linode-authenticator@master
+        with:
+          LINODE_TOKEN: ${{ secrets.LINODE_TOKEN }}
+
+      - name: Deploy to k8s
+        run: |
+          kubectl apply -f k8s/broker.yml
