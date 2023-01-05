@@ -37,11 +37,6 @@ jobs:
         #  version: '<version>' # default is latest stable
         id: install
 
-      - name: get linode kubernetes config
-        uses: mavieth/linode-authenticator@master
-        with:
-          LINODE_TOKEN: ${{ secrets.LINODE_TOKEN }}
-
       - name: Deploy to k8s
         run: |
           kubectl apply -f k8s/broker.yml
