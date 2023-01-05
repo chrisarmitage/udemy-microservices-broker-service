@@ -45,5 +45,6 @@ jobs:
 
       - name: Deploy to k8s
         run: |
-          kubectl config view
+          ls
+          ls k8s
           kubectl apply -f k8s/broker.yml
