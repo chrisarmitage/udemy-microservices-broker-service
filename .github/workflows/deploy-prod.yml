@@ -45,5 +45,6 @@ jobs:
 
       - name: Deploy to k8s
         run: |
-          pwd         
-          kubectl apply -f k8s/broker.yml
+          pwd
+          ls -al
+          kubectl apply -f ./k8s/broker.yml
