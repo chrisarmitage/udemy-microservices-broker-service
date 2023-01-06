@@ -43,7 +43,7 @@ type MailPayload struct {
 func (app *Config) Broker(w http.ResponseWriter, r *http.Request) {
 	payload := jsonResponse{
 		Error:   false,
-		Message: "Hit the broker v5",
+		Message: "Hit the broker v6",
 	}
 
 	_ = app.writeJson(w, http.StatusOK, payload)
